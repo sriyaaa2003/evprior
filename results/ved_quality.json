@@ -1,0 +1,25 @@
+{
+ "n_trips_raw": 504,
+ "n_kept": 341,
+ "km_total_kept": 2063.4802177899933,
+ "kwh_total_kept": 323.987556388889,
+ "drop_reasons": {
+  "energy_out_of_range": 13,
+  "too_short_duration": 96,
+  "too_short_distance": 47,
+  "distance_mismatch_speed_vs_gps": 7
+ },
+ "kept_per_vehicle": {
+  "VED10": 133,
+  "VED541": 5,
+  "VED455": 203
+ },
+ "wh_per_km_median": 146.59012574164052,
+ "corr_energy_vs_soc_drop": 0.822620129350342,
+ "implied_pack_capacity_kwh_median": 15.99262973443707,
+ "implied_pack_capacity_kwh_iqr": [
+  12.6180056513899,
+  19.041523452164675
+ ],
+ "note": "capacity = trip energy / SOC drop. The sign is confirmed by the strong correlation; the implied capacity is the same order as the 24 kWh nominal pack of a used 2013 Leaf, with a wide spread because SOC is coarse on short trips. It is a plausibility check, not a calibration."
+}

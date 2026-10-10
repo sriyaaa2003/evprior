@@ -1,0 +1,20 @@
+{
+  "run_hash": "4396ad152f6e",
+  "n_files": 1396,
+  "n_kept": 1170,
+  "drop_reasons": {
+    "too_short_distance": 163,
+    "too_short_duration": 63
+  },
+  "kept_per_vehicle": {
+    "BEV2": 843,
+    "BEV1": 327
+  },
+  "km_total_kept": 27624.368858888298,
+  "kwh_total_kept": 4912.604398430569,
+  "wh_per_km_median": 186.48837246666727,
+  "vi_vs_counter_ratio_median": 1.0017832582860975,
+  "vi_vs_counter_within_5pct": 0.9898336414048059,
+  "counter_negative_energy_trips_all": 10,
+  "odometer_note": "BEV1 odometer unusable (values ~ -4.2e6); distance derived from speed integral, GPS used as check"
+}

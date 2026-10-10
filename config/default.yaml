@@ -1,0 +1,94 @@
+# All tunables live here. Every stage reads this file; nothing below is hardcoded in code.
+paths:
+  raw_dir: "data/raw/BEV energy dynamic data_V2/driving sessions"
+  interim_dir: "data/interim"
+  results_dir: "results"
+  cache_dir: "data/interim/cache"
+
+ingest:
+  max_fill_s: 5            # forward-fill limit for sparse signals (seconds)
+  max_dt_s: 5              # larger gaps are not integrated across
+  min_duration_s: 180
+  min_dist_km: 2.0
+  max_dist_disagreement: 0.15   # |speed-integral - gps| / speed-integral
+  min_kwh: 0.2
+  max_kwh: 80.0
+  min_signal_coverage: 0.95     # share of rows with valid voltage, current and speed (after fill)
+  max_speed_kmh: 220
+  stationary_gps_mps: 0.5       # GPS speed below this with null vehicle speed => standing
+  gps_jitter_max_step_m: 500    # per-second GPS step above this is treated as a glitch
+
+enrich:
+  elevation_url: "https://api.opentopodata.org/v1/srtm30m"
+  elevation_batch: 100
+  elevation_sleep_s: 1.1
+  elevation_precision: 3        # decimals of lat/lon used as cache key (~100 m)
+  weather_url: "https://archive-api.open-meteo.com/v1/archive"
+  weather_grid_deg: 0.25
+  weather_hourly: ["temperature_2m", "wind_speed_10m", "wind_direction_10m", "precipitation", "relative_humidity_2m"]
+  retries: 5
+  backoff_s: 2.0
+  timeout_s: 30
+  resample_m: 200               # polyline resampling step for elevation lookups
+
+segments:
+  length_km: 1.0
+  min_last_segment_km: 0.3
+  elev_smooth_window: 3        # moving-average window (route samples) applied to SRTM profile     # shorter remainder is merged into the previous segment
+
+prior:
+  n_estimators: 400
+  max_depth: 4
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  min_child_weight: 5
+  speed_proxy_grid_deg: 0.005   # ~500 m cell for the planned-speed proxy
+  seed: 7
+
+filter:
+  min_obs_segments: 1
+  var_floor: 1.0e-6
+  e_min_kwh: 0.02              # lower bound on nominal segment energy in the noise model
+  q_init: 0.002
+  carry_pseudo_kwh: 5.0         # cross-trip carry-over: nominal kWh of evidence needed to move the vehicle prior away from 1
+  carry_halflife_days: 30.0     # forgetting of earlier trips in the carry-over
+  sigma_obs_init: 0.15
+
+eval:
+  regimes:                     # prior-quality regimes the dynamic methods are evaluated under
+    - {name: full, kind: physics_gbm, drop_groups: [], all_kinds: true}
+    - {name: no_history, kind: physics_gbm, drop_groups: [speed]}
+    - {name: naive, kind: mean_intensity, drop_groups: []}
+  ehat_floor_kwh_per_km: 0.02
+  z_bucket_edges_km: [2, 5, 10, 20]
+  inner_folds: 4
+  forward_min_train: 150
+  fit_max_segments: 60      # trips are truncated to this many segments when fitting filter parameters
+  robustness_seed: 5
+  tau_grid: [0.5, 1, 2, 3, 5, 8, 12, 20, 35, 60, 120, 250, 500]
+  checkpoints_km: [1, 2, 5, 10, 20]
+  checkpoints_frac: [0.1, 0.25, 0.5, 0.75, 0.9]
+  reserve_kwh: 3.0
+  bootstrap_n: 1000
+  seed: 11
+  quantiles: [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
+  coverage_levels: [0.8, 0.9]
+  n_folds: 5
+  winter_months: [12, 1, 2]
+  min_trips_per_fold: 20
+
+robustness:
+  speed_dropout_p: [0.0, 0.2, 0.5]
+  obs_delay_segments: [0, 1, 2]
+  obs_noise_rel: [0.0, 0.1, 0.25]
+
+ved:                              # external validation: Vehicle Energy Dataset (Ann Arbor, MI), the three Nissan Leaf BEVs
+  raw_dir: "data/raw/ved"
+  ev_ids: [10, 455, 541]
+  tz: "America/Detroit"
+  day0: "2017-11-01"              # DayNum 1.0 is local midnight of this date
+  current_discharge_sign: -1      # VED reports discharge as negative current; energy used = -sum(V*I)
+  regimes:                        # regimes evaluated on the transfer test (train on KU Leuven, test on VED)
+    - {name: no_history, kind: physics_gbm, drop_groups: [speed]}
+    - {name: naive, kind: mean_intensity, drop_groups: []}

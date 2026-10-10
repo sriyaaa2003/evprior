@@ -1,0 +1,27 @@
+{
+ "unit": "mean |SHAP| in Wh/km, distance-weighted, held-out folds",
+ "importance": {
+  "pre_grade": 19.898079023076516,
+  "pre_seg_len_km": 13.691880124156725,
+  "pre_pos_frac": 11.015320268797948,
+  "pre_wx_temp_c": 9.898618821681445,
+  "pre_elev_delta_m": 9.830874614872805,
+  "pre_pos_km": 9.14721824088843,
+  "pre_speed_proxy": 7.862987904260947,
+  "pre_elev_loss_m": 4.763803113288893,
+  "pre_elev_start_m": 4.523486757563084,
+  "pre_route_km": 3.4559094166363065,
+  "pre_wx_headwind_ms": 3.0218547936429547,
+  "pre_wx_rh": 2.7441161826098335,
+  "pre_amb_start_c": 2.4007026925721284,
+  "pre_elev_gain_m": 2.3448217799905686,
+  "pre_vehicle": 2.0958845975288476,
+  "pre_pack_t_start_c": 2.078240042915911,
+  "pre_wx_crosswind_ms": 1.9858352345927428,
+  "pre_hour": 1.497868724392652,
+  "pre_wx_precip_mm": 1.2569084196357592,
+  "pre_wx_wind_ms": 1.0822913842262571,
+  "pre_soc_start": 0.930540041438893,
+  "pre_weekday": 0.32726712377746053
+ }
+}

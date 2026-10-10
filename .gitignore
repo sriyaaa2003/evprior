@@ -1,0 +1,6 @@
+data/raw/
+data/interim/
+scratch/
+__pycache__/
+*.egg-info/
+.pytest_cache/
