@@ -5,6 +5,7 @@ Models (all produce kWh per segment; the trip prior is the sum over segments):
   physics_ridge   road-load structured linear regression (aero, grade, regen, HVAC, wind, rain)
   gbm             gradient-boosted trees on intensity (kWh/km), distance-weighted
   physics_gbm     physics_ridge plus a gbm on its residual intensity
+  physics_cat     physics_ridge plus a deep CatBoost model on its residual intensity (v2; best prior on every evaluation scheme)
 and a direct trip-level gbm (gbm_trip) trained on trip aggregates.
 """
 from __future__ import annotations
@@ -119,6 +120,12 @@ class SegmentPrior:
                             subsample=float(p.subsample), colsample_bytree=float(p.colsample_bytree),
                             min_child_weight=float(p.min_child_weight), tree_method="hist", random_state=int(p.seed), n_jobs=8)
 
+    def _cat(self):
+        from catboost import CatBoostRegressor
+        p = self.cfg.prior
+        return CatBoostRegressor(iterations=int(p.cat_iterations), depth=int(p.cat_depth), learning_rate=float(p.cat_learning_rate),
+                                 l2_leaf_reg=3.0, verbose=0, random_seed=int(p.seed), thread_count=8, allow_writing_files=False)
+
     def _prep(self, seg: pl.DataFrame, train: bool) -> pl.DataFrame:
         if not self.use_proxy:   # no route-speed history available: physics terms use one constant planning speed
             return seg.with_columns(pl.lit(NO_HISTORY_SPEED_KMH).alias("pre_speed_proxy"))
@@ -130,15 +137,15 @@ class SegmentPrior:
         d = s["dist_km"].to_numpy()
         inten = s["e_kwh"].to_numpy() / d
         self.mean_int = float(s["e_kwh"].sum() / d.sum())
-        if self.kind in ("physics_ridge", "physics_gbm"):
+        if self.kind in ("physics_ridge", "physics_gbm", "physics_cat"):
             X = _physics_design(s, self.groups)
             self.ridge = Ridge(alpha=1.0, fit_intercept=False).fit(X, s["e_kwh"].to_numpy())
-        if self.kind in ("gbm", "physics_gbm"):
+        if self.kind in ("gbm", "physics_gbm", "physics_cat"):
             X = s.select(self.cols).to_numpy()
             y = inten
-            if self.kind == "physics_gbm":
+            if self.kind in ("physics_gbm", "physics_cat"):
                 y = (s["e_kwh"].to_numpy() - self.ridge.predict(_physics_design(s, self.groups))) / d
-            self.gbm = self._gbm().fit(X, y, sample_weight=d)
+            self.gbm = (self._cat() if self.kind == "physics_cat" else self._gbm()).fit(X, y, sample_weight=d)
         return self
 
     def predict(self, seg: pl.DataFrame) -> np.ndarray:
@@ -151,7 +158,7 @@ class SegmentPrior:
         X = s.select(self.cols).to_numpy()
         if self.kind == "gbm":
             return self.gbm.predict(X) * d
-        if self.kind == "physics_gbm":
+        if self.kind in ("physics_gbm", "physics_cat"):
             return self.ridge.predict(_physics_design(s, self.groups)) + self.gbm.predict(X) * d
         raise ValueError(self.kind)
 

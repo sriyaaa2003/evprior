@@ -43,6 +43,9 @@ prior:
   subsample: 0.8
   colsample_bytree: 0.8
   min_child_weight: 5
+  cat_iterations: 1000          # physics_cat: CatBoost residual model (depth 8 chosen by grouped CV, see experiments/prior_search*.py)
+  cat_depth: 8
+  cat_learning_rate: 0.04
   speed_proxy_grid_deg: 0.005   # ~500 m cell for the planned-speed proxy
   seed: 7
 
@@ -60,6 +63,7 @@ eval:
     - {name: full, kind: physics_gbm, drop_groups: [], all_kinds: true}
     - {name: no_history, kind: physics_gbm, drop_groups: [speed]}
     - {name: naive, kind: mean_intensity, drop_groups: []}
+    - {name: full_cat, kind: physics_cat, drop_groups: []}      # v2 prior
   ehat_floor_kwh_per_km: 0.02
   z_bucket_edges_km: [2, 5, 10, 20]
   inner_folds: 4
@@ -92,3 +96,4 @@ ved:                              # external validation: Vehicle Energy Dataset 
   regimes:                        # regimes evaluated on the transfer test (train on KU Leuven, test on VED)
     - {name: no_history, kind: physics_gbm, drop_groups: [speed]}
     - {name: naive, kind: mean_intensity, drop_groups: []}
+    - {name: no_history_cat, kind: physics_cat, drop_groups: [speed]}   # v2 prior

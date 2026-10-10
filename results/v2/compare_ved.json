@@ -1,0 +1,28 @@
+{
+ "pretrip|physics_gbm": {
+  "wape": 0.6697611405417767,
+  "bias": 0.6534624262523917
+ },
+ "pretrip|physics_cat": {
+  "wape": 0.47554788443114593,
+  "bias": 0.437125146148506
+ },
+ "no_history|static|2km": 0.4152198861699444,
+ "no_history|static|5km": 0.3670092065437226,
+ "no_history|static|10km": 0.4073192754317415,
+ "no_history|kf_mult|2km": 0.3622752353824727,
+ "no_history|kf_mult|5km": 0.2969853199859277,
+ "no_history|kf_mult|10km": 0.31432415276263215,
+ "no_history|kf_carry|2km": 0.20834232949927564,
+ "no_history|kf_carry|5km": 0.22760762865178885,
+ "no_history|kf_carry|10km": 0.25213739580074307,
+ "no_history_cat|static|2km": 0.2987546545363535,
+ "no_history_cat|static|5km": 0.2746849912316782,
+ "no_history_cat|static|10km": 0.32418478682942237,
+ "no_history_cat|kf_mult|2km": 0.264008786277122,
+ "no_history_cat|kf_mult|5km": 0.227691602422726,
+ "no_history_cat|kf_mult|10km": 0.2721655757743914,
+ "no_history_cat|kf_carry|2km": 0.2015764861734147,
+ "no_history_cat|kf_carry|5km": 0.21021451662522,
+ "no_history_cat|kf_carry|10km": 0.249649627436826
+}

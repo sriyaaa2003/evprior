@@ -19,7 +19,7 @@ from .splits import Fold, assert_disjoint, forward_chain, grouped_folds, leave_o
 
 log = logging.getLogger(__name__)
 
-PRIOR_KINDS = ["mean_intensity", "physics_ridge", "gbm", "physics_gbm"]
+PRIOR_KINDS = ["mean_intensity", "physics_ridge", "gbm", "physics_gbm", "physics_cat"]
 
 
 def qname(t: float, prefix: str = "c") -> str:
